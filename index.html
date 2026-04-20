@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Optimización Predictiva para Ingenios Azucareros</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --sugar-cream: #FFF9F0;
+            --cane-green: #2D5016;
+            --raw-sugar: #C9A66B;
+            --dark-molasses: #1A1A1A;
+            --extraction-gold: #D4AF37;
+            --caramel: #8B4513;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Work Sans', sans-serif;
+            background: var(--sugar-cream);
+            color: var(--dark-molasses);
+            overflow-x: hidden;
+        }
+
+        .grain-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        .lang-toggle {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            z-index: 1000;
+            display: flex;
+            gap: 0.5rem;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 0.5rem;
+            border-radius: 50px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .lang-btn {
+            padding: 0.5rem 1.25rem;
+            border: none;
+            background: transparent;
+            color: var(--dark-molasses);
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            font-family: 'Work Sans', sans-serif;
+            font-size: 0.9rem;
+        }
+
+        .lang-btn.active {
+            background: var(--cane-green);
+            color: var(--sugar-cream);
+        }
+
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding: 2rem;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(201, 166, 107, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(45, 80, 22, 0.1) 0%, transparent 50%);
+        }
+
+        .hero-content {
+            max-width: 1200px;
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .hero-text h1 {
+            font-family: 'DM Serif Display', serif;
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            line-height: 1.1;
+            color: var(--cane-green);
+            margin-bottom: 1.5rem;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .hero-text .highlight {
+            color: var(--extraction-gold);
+            font-style: italic;
+        }
+
+        .hero-text p {
+            font-size: 1.25rem;
+            line-height: 1.7;
+            color: var(--dark-molasses);
+            opacity: 0.85;
+            margin-bottom: 2rem;
+            animation: fadeInUp 0.8s ease-out 0.2s backwards;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            margin-top: 3rem;
+            animation: fadeInUp 0.8s ease-out 0.4s backwards;
+        }
+
+        .stat-item {
+            text-align: left;
+        }
+
+        .stat-number {
+            font-family: 'DM Serif Display', serif;
+            font-size: 2.5rem;
+            color: var(--extraction-gold);
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--dark-molasses);
+            opacity: 0.7;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 500;
+        }
+
+        .form-container {
+            background: white;
+            padding: 3rem;
+            border-radius: 20px;
+            box-shadow: 
+                0 20px 60px rgba(45, 80, 22, 0.15),
+                0 0 0 1px rgba(45, 80, 22, 0.05);
+            animation: fadeInRight 0.8s ease-out 0.3s backwards;
+            position: relative;
+        }
+
+        .form-container::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(135deg, var(--extraction-gold), var(--cane-green));
+            border-radius: 20px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: -1;
+        }
+
+        .form-container:hover::before {
+            opacity: 0.1;
+        }
+
+        .form-container h2 {
+            font-family: 'DM Serif Display', serif;
+            font-size: 2rem;
+            color: var(--cane-green);
+            margin-bottom: 0.75rem;
+        }
+
+        .form-container p {
+            color: var(--dark-molasses);
+            opacity: 0.7;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--dark-molasses);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid rgba(45, 80, 22, 0.1);
+            border-radius: 10px;
+            font-family: 'Work Sans', sans-serif;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: var(--sugar-cream);
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--cane-green);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(45, 80, 22, 0.05);
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 1.25rem;
+            background: var(--cane-green);
+            color: var(--sugar-cream);
+            border: none;
+            border-radius: 10px;
+            font-family: 'Work Sans', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-top: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .submit-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s ease, height 0.6s ease;
+        }
+
+        .submit-btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .submit-btn:hover {
+            background: var(--caramel);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(45, 80, 22, 0.3);
+        }
+
+        .features {
+            padding: 6rem 2rem;
+            background: white;
+        }
+
+        .features-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            font-family: 'DM Serif Display', serif;
+            font-size: clamp(2rem, 4vw, 3rem);
+            text-align: center;
+            color: var(--cane-green);
+            margin-bottom: 4rem;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 3rem;
+        }
+
+        .feature-card {
+            padding: 2.5rem;
+            border-radius: 15px;
+            background: var(--sugar-cream);
+            border: 2px solid transparent;
+            transition: all 0.4s ease;
+            position: relative;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 0;
+            background: linear-gradient(to bottom, var(--extraction-gold), var(--cane-green));
+            transition: height 0.4s ease;
+            border-radius: 4px;
+        }
+
+        .feature-card:hover::before {
+            height: 100%;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(45, 80, 22, 0.15);
+            border-color: rgba(45, 80, 22, 0.1);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .feature-card h3 {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.5rem;
+            color: var(--cane-green);
+            margin-bottom: 1rem;
+        }
+
+        .feature-card p {
+            line-height: 1.7;
+            color: var(--dark-molasses);
+            opacity: 0.8;
+        }
+
+        .success-message {
+            display: none;
+            background: var(--cane-green);
+            color: var(--sugar-cream);
+            padding: 2rem;
+            border-radius: 10px;
+            text-align: center;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInRight {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @media (max-width: 968px) {
+            .hero-content {
+                grid-template-columns: 1fr;
+                gap: 3rem;
+            }
+
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .form-container {
+                padding: 2rem;
+            }
+
+            .lang-toggle {
+                top: 1rem;
+                right: 1rem;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .stats {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+        }
+
+        [data-lang] {
+            display: none;
+        }
+
+        [data-lang].active {
+            display: block;
+        }
+
+        span[data-lang].active {
+            display: inline;
+        }
+    </style>
+</head>
+<body>
+    <div class="grain-overlay"></div>
+    
+    <div class="lang-toggle">
+        <button class="lang-btn active" data-lang-btn="es">Español</button>
+        <button class="lang-btn" data-lang-btn="en">English</button>
+    </div>
+
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-text">
+                <h1 data-lang="es" class="active">
+                    Extraiga <span class="highlight">más valor</span> de cada tonelada de caña
+                </h1>
+                <h1 data-lang="en">
+                    Extract <span class="highlight">more value</span> from every ton of cane
+                </h1>
+                
+                <p data-lang="es" class="active">
+                    Modelo predictivo de última generación para optimizar su proceso de extracción de azúcar. Anticipe problemas, maximice rendimiento y aumente rentabilidad con precisión basada en datos.
+                </p>
+                <p data-lang="en">
+                    State-of-the-art predictive model to optimize your sugar extraction process. Anticipate issues, maximize yield, and increase profitability with data-driven precision.
+                </p>
+
+                <div class="stats">
+                    <div class="stat-item">
+                        <span class="stat-number">+40%</span>
+                        <span class="stat-label" data-lang="es" class="active">Precisión</span>
+                        <span class="stat-label" data-lang="en">Accuracy</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">24/7</span>
+                        <span class="stat-label" data-lang="es" class="active">Monitoreo</span>
+                        <span class="stat-label" data-lang="en">Monitoring</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">ROI</span>
+                        <span class="stat-label" data-lang="es" class="active">Inmediato</span>
+                        <span class="stat-label" data-lang="en">Immediate</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-container">
+                <div class="form-content">
+                    <h2 data-lang="es" class="active">Solicite una Demo</h2>
+                    <h2 data-lang="en">Request a Demo</h2>
+                    
+                    <p data-lang="es" class="active">
+                        Descubra cómo nuestro modelo puede transformar su operación. Complete el formulario y nos pondremos en contacto.
+                    </p>
+                    <p data-lang="en">
+                        Discover how our model can transform your operation. Fill out the form and we'll get in touch.
+                    </p>
+
+                    <form id="contactForm">
+                        <div class="form-group">
+                            <label for="name">
+                                <span data-lang="es" class="active">Nombre Completo</span>
+                                <span data-lang="en">Full Name</span>
+                            </label>
+                            <input type="text" id="name" name="name" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email">
+                                <span data-lang="es" class="active">Correo Electrónico</span>
+                                <span data-lang="en">Email Address</span>
+                            </label>
+                            <input type="email" id="email" name="email" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="company">
+                                <span data-lang="es" class="active">Empresa / Ingenio</span>
+                                <span data-lang="en">Company / Mill Name</span>
+                            </label>
+                            <input type="text" id="company" name="company" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="location">
+                                <span data-lang="es" class="active">Ubicación del Ingenio</span>
+                                <span data-lang="en">Mill Location</span>
+                            </label>
+                            <input type="text" id="location" name="location" placeholder="Ciudad, País / City, Country" required>
+                        </div>
+
+                        <button type="submit" class="submit-btn">
+                            <span data-lang="es" class="active">Solicitar Consulta</span>
+                            <span data-lang="en">Request Consultation</span>
+                        </button>
+                    </form>
+
+                    <div class="success-message" id="successMessage">
+                        <h3 data-lang="es" class="active">¡Gracias por su interés!</h3>
+                        <h3 data-lang="en">Thank you for your interest!</h3>
+                        <p data-lang="es" class="active">Nos pondremos en contacto pronto.</p>
+                        <p data-lang="en">We'll be in touch soon.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="features">
+        <div class="features-container">
+            <h2 class="section-title">
+                <span data-lang="es" class="active">¿Por qué elegir nuestro modelo?</span>
+                <span data-lang="en">Why choose our model?</span>
+            </h2>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <span class="feature-icon">🎯</span>
+                    <h3 data-lang="es" class="active">Predicción Precisa</h3>
+                    <h3 data-lang="en">Precise Prediction</h3>
+                    <p data-lang="es" class="active">
+                        Algoritmos entrenados con datos reales de ingenios para identificar patrones críticos y anticipar anomalías antes de que afecten producción.
+                    </p>
+                    <p data-lang="en">
+                        Algorithms trained on real mill data to identify critical patterns and anticipate anomalies before they affect production.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <span class="feature-icon">⚡</span>
+                    <h3 data-lang="es" class="active">Implementación Rápida</h3>
+                    <h3 data-lang="en">Fast Implementation</h3>
+                    <p data-lang="es" class="active">
+                        Integración simple con sus sistemas existentes. Sin necesidad de infraestructura compleja. Resultados desde el primer día.
+                    </p>
+                    <p data-lang="en">
+                        Simple integration with your existing systems. No need for complex infrastructure. Results from day one.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <span class="feature-icon">📊</span>
+                    <h3 data-lang="es" class="active">Visualización Clara</h3>
+                    <h3 data-lang="en">Clear Visualization</h3>
+                    <p data-lang="es" class="active">
+                        Dashboards intuitivos que traducen datos complejos en insights accionables para operadores e ingenieros.
+                    </p>
+                    <p data-lang="en">
+                        Intuitive dashboards that translate complex data into actionable insights for operators and engineers.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <span class="feature-icon">💰</span>
+                    <h3 data-lang="es" class="active">ROI Comprobado</h3>
+                    <h3 data-lang="en">Proven ROI</h3>
+                    <p data-lang="es" class="active">
+                        Aumento medible en eficiencia de extracción. Reducción de pérdidas. Más azúcar por tonelada procesada.
+                    </p>
+                    <p data-lang="en">
+                        Measurable increase in extraction efficiency. Reduced losses. More sugar per ton processed.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <span class="feature-icon">🔧</span>
+                    <h3 data-lang="es" class="active">Soporte Continuo</h3>
+                    <h3 data-lang="en">Continuous Support</h3>
+                    <p data-lang="es" class="active">
+                        Acompañamiento técnico durante implementación y operación. Ajustes personalizados según características de su ingenio.
+                    </p>
+                    <p data-lang="en">
+                        Technical support during implementation and operation. Custom adjustments based on your mill's characteristics.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <span class="feature-icon">🌱</span>
+                    <h3 data-lang="es" class="active">Optimización Sostenible</h3>
+                    <h3 data-lang="en">Sustainable Optimization</h3>
+                    <p data-lang="es" class="active">
+                        Mejore rendimiento mientras reduce consumo energético y desperdicio. Producción más eficiente y responsable.
+                    </p>
+                    <p data-lang="en">
+                        Improve performance while reducing energy consumption and waste. More efficient and responsible production.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Language toggle
+        const langButtons = document.querySelectorAll('[data-lang-btn]');
+        const langElements = document.querySelectorAll('[data-lang]');
+        
+        langButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const targetLang = btn.getAttribute('data-lang-btn');
+                
+                // Update buttons
+                langButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                // Update content
+                langElements.forEach(el => {
+                    el.classList.remove('active');
+                    if (el.getAttribute('data-lang') === targetLang) {
+                        el.classList.add('active');
+                    }
+                });
+                
+                // Update HTML lang attribute
+                document.documentElement.lang = targetLang;
+            });
+        });
+
+        // Form submission
+        const form = document.getElementById('contactForm');
+        const successMessage = document.getElementById('successMessage');
+        const formContent = form.closest('.form-content');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(form);
+            const data = {
+                name: formData.get('name'),
+                email: formData.get('email'),
+                company: formData.get('company'),
+                location: formData.get('location')
+            };
+
+            // Create mailto link
+            const subject = encodeURIComponent('Demo Request - Sugar Mill Optimization');
+            const body = encodeURIComponent(
+                `Name: ${data.name}\n` +
+                `Email: ${data.email}\n` +
+                `Company/Mill: ${data.company}\n` +
+                `Location: ${data.location}\n\n` +
+                `Requested demo for sugar mill prediction model.`
+            );
+            
+            const mailtoLink = `mailto:gabripda@gmail.com?subject=${subject}&body=${body}`;
+            window.location.href = mailtoLink;
+
+            // Show success message
+            form.style.display = 'none';
+            successMessage.classList.add('show');
+
+            // Reset after 5 seconds
+            setTimeout(() => {
+                form.reset();
+                form.style.display = 'block';
+                successMessage.classList.remove('show');
+            }, 5000);
+        });
+    </script>
+</body>
+</html>
